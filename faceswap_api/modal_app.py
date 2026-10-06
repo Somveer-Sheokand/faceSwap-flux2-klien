@@ -90,7 +90,8 @@ def analyze_fn(run_id: str, video_url: str, source_urls: list, template_id: str)
 
 
 # cpu/memory matter: FaceFusion decodes, masks and pastes every frame on the CPU, and the default 0.125 core made it ~10 s/frame
-@app.function(image=image, gpu="L4", cpu=8, memory=16384, volumes={"/data": volume}, timeout=3600)
+@app.function(image=image, gpu="L4", cpu=8, memory=16384, volumes={"/data": volume}, timeout=3600,
+              max_containers=8, scaledown_window=30)  # cap parallel GPUs (cost guard); release idle ones fast
 def swap_chunk_fn(job_id: str, idx: int, chunk: str, sources: list, params: dict, best: list) -> dict:
     """Swap one chunk of the video on its own GPU."""
     from faceswap_api import engine
